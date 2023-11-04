@@ -49,7 +49,7 @@ class PointMass:
             m[i] = int(m[i] * 10 ** y) / 10 ** y
     def step(self, dt):
         if not self.l:
-            # self.round(self.a)
+            self.round(self.a)
             self.p[0] += self.v[0]*dt
             self.p[1] += self.v[1]*dt
             self.v[0] += self.a[0]*dt

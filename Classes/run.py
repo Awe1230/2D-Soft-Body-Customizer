@@ -4,6 +4,7 @@ from Classes.pressure import Pressure
 from Classes.poly import Poly
 import numpy as np
 import pygame
+import math
 
 class Run:
     def __init__(self, full_screen):
@@ -11,7 +12,8 @@ class Run:
         self.pts = []
         self.springs = []
         self.polys = []
-        self.r = 25.0
+        self.pressures = []
+        self.r = 25.0/4
 
         pygame.init()
 
@@ -60,18 +62,22 @@ class Run:
         t = True
         f = False
         g = -5
-        p1 = PointMass(np.array([x, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
-        p2 = PointMass(np.array([x, y + s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, True)
-        p3 = PointMass(np.array([x + s, y + s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
-        p4 = PointMass(np.array([x + s, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+        p1 = PointMass(np.array([x, y+s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+        p2 = PointMass(np.array([x, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, True)
+        p3 = PointMass(np.array([x + s, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+        p4 = PointMass(np.array([x + s, y + s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+        # p5 = PointMass(np.array([x + s/2, y + s*3/2]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
         self.pts.append(p1)
         self.pts.append(p2)
         self.pts.append(p3)
         self.pts.append(p4)
+        # self.pts.append(p5)
         self.polys.append(Poly(np.array(p1.p.copy()), p1, self.r))
         self.polys.append(Poly(np.array(p2.p.copy()), p2, self.r))
         self.polys.append(Poly(np.array(p3.p.copy()), p3, self.r))
         self.polys.append(Poly(np.array(p4.p.copy()), p4, self.r))
+        # self.polys.append(Poly(np.array(p5.p.copy()), p5, self.r))
+        self.pressures.append(Pressure(self.pts, 255500))
     
     def initialize_polys(self):
         p1 = Poly(np.array([(200.0, 500.0), (700.0, 400.0), (200.0, 400.0)]), i = None, r = None)
@@ -91,10 +97,14 @@ class Run:
         self.springs.append(spring1)
         spring2 = Spring(self.pts[0], self.pts[3], s, d)
         self.springs.append(spring2)
-        spring3 = Spring(self.pts[2], self.pts[3], s, d)
-        self.springs.append(spring3)
-        spring4 = Spring(self.pts[1], self.pts[2], s, d)
+        # spring3 = Spring(self.pts[1], self.pts[4], s, d)
+        # self.springs.append(spring3)
+        spring4 = Spring(self.pts[2], self.pts[3], s, d)
         self.springs.append(spring4)
+        spring5 = Spring(self.pts[1], self.pts[2], s, d)
+        self.springs.append(spring5)
+        # spring5 = Spring(self.pts[4], self.pts[2], s, d)
+        # self.springs.append(spring5)
     
     def initialize_body(self, x, y, s, m, n, k):
         g = -9.8
@@ -118,6 +128,22 @@ class Run:
                     self.springs.append(Spring(self.pts[j * m + i], self.pts[(j + 1) * m + (i + 1)], k, l))
             if i < m - 1:
                 self.springs.append(Spring(self.pts[j * m + i], self.pts[j * m + (i + 1)], k, l))
+    
+    def initialize_shape(self, x, y, r, sides, k):
+        g = -9.8
+        f = False
+        l = k/3
+        angle = 2*math.pi/sides
+        for n in range(sides):
+            p = PointMass(np.array([x + math.cos(n*angle)*r, y + math.sin(n*angle)*r]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+            self.pts.append(p)
+            x1, y1 = p.p
+            self.polys.append(Poly(np.array([x1, y1]), p, self.r))
+        for n in range(sides):
+            next = (n + 1) % sides
+            self.springs.append(Spring(self.pts[n], self.pts[next], k, l))
+
+            self.pressures.append(Pressure(self.pts, 2))
 
     def update_frame(self):
         for p in self.polys:
@@ -126,10 +152,13 @@ class Run:
         for pt in self.pts:
             pt.eraseA()
 
+        self.pressures[0].inflate()
+
         for spring in self.springs:
             self.draw_spring(spring)
             spring.applyForce()
         for pt in self.pts:
+            # self.prints(pt)
             for p in self.polys:
                 p.move(self.r)
                 p.collide(pt)
@@ -138,14 +167,27 @@ class Run:
             self.draw_pt(pt)
             dt = 0.05
             pt.step(dt)
-
+    def prints(self, pt):
+        if pt.a[1] + 0.1 > 0:
+            print("top", end = " ")
+        elif pt.a[1] + 0.1 == 0:
+            print("center", end = " ")
+        else:
+            print("bottom", end = " ")
+        if pt.a[0] > 0:
+            print("left", end = " | ")
+        elif pt.a[0] == 0:
+            print("center", end = " | ")
+        else:
+            print("right", end = " | ")
     def run(self):
 
         # self.initialize_pts()
 
         # self.initialize_springs()
-        self.initialize_body(400.0, 710.0, 40.0, 5, 6, 10.0)
-        self.initialize_polys()
+    #     self.initialize_body(400.0, 710.0, 40.0, 5, 6, 10.0)
+        self.initialize_shape(400, 300, 70, 12, 6.0)
+    #     self.initialize_polys()
 
         # Run until the user asks to quit
         running = True
