@@ -133,7 +133,7 @@ class Run:
             if i < m - 1:
                 self.springs.append(Spring(self.pts[j * m + i], self.pts[j * m + (i + 1)], k, l))
     
-    def initialize_shape(self, x, y, r, sides, k):
+    def initialize_shape(self, x, y, r, sides, k, b):
         g = -9.8
         f = False
         l = k/3
@@ -148,6 +148,8 @@ class Run:
             self.springs.append(Spring(self.pts[n], self.pts[next], k, l))
 
             self.pressures.append(Pressure(self.pts, 2))
+        if b:
+            self.initialize_caster()
     
     def initialize_caster(self):
         k = 1.0
@@ -164,6 +166,10 @@ class Run:
             for i in range(len(cast.casted)):
                 cast.casted[i].updateP(x[i])
                 # cast.casted[i].eraseA()
+    
+    def inflate(self):
+        for pressure in self.pressures:
+            pressure.inflate()
                 
 
 
@@ -176,7 +182,8 @@ class Run:
         
         self.move_cast()
 
-        self.pressures[0].inflate()
+        self.inflate()
+
         for spring in self.springs:
             self.draw_spring(spring)
             spring.applyForce()
@@ -188,7 +195,8 @@ class Run:
             if (pt.l or pt.c) and pygame.mouse.get_pressed()[0]:
                 pt.updateP(np.array(self.to_pygame(pygame.mouse.get_pos())))
             self.draw_pt(pt)
-            self.draw_pt(self.casted[0].casted[i])
+            for casted in self.casted:
+                self.draw_pt(casted.casted[i])
             dt = 0.05
             pt.step(dt)
     def prints(self, pt):
@@ -210,9 +218,8 @@ class Run:
 
         # self.initialize_springs()
         # self.initialize_body(400.0, 710.0, 40.0, 5, 6, 12.5)
-        self.initialize_shape(400, 500, 70, 6, 6.0)
+        self.initialize_shape(400, 500, 70, 6, 6.0, True)
         self.initialize_polys()
-        self.initialize_caster()
 
         # Run until the user asks to quit
         running = True
