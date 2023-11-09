@@ -1,7 +1,9 @@
 from Classes.point_mass import PointMass
 from Classes.spring import Spring
+from Classes.cast import Cast
 from Classes.pressure import Pressure
 from Classes.poly import Poly
+import copy
 import numpy as np
 import pygame
 import math
@@ -14,6 +16,7 @@ class Run:
         self.polys = []
         self.pressures = []
         self.r = 25.0/4
+        self.casted = []
 
         pygame.init()
 
@@ -30,7 +33,6 @@ class Run:
 
     def draw_pt(self, x):
         blue = (40, 40, 40)
-        radius = 5
         position = self.to_pygame([x.p[0], x.p[1]])
         pygame.draw.circle(self.screen, blue, position, self.r/2)
     
@@ -80,14 +82,16 @@ class Run:
         self.pressures.append(Pressure(self.pts, 255500))
     
     def initialize_polys(self):
-        p1 = Poly(np.array([(200.0, 500.0), (700.0, 400.0), (200.0, 400.0)]), i = None, r = None)
+        # p1 = Poly(np.array([(200.0, 500.0), (700.0, 400.0), (200.0, 400.0)]), i = None, r = None)
+        # self.polys.append(p1)
+        p1 = Poly(np.array([(200.0, 250.0), (550.0, 300.0), (550.0, 250.0)]), i = None, r = None)
         self.polys.append(p1)
-        p2 = Poly(np.array([(700.0, 190.0), (1150.0, 190.0), (1150.0, 250.0), (700.0, 200.0)]), i = None, r = None)
-        self.polys.append(p2)
-        p3 = Poly(np.array([(200, -10.0), (300, -10.0), (250.0, 300.0)]), i = None, r = None)
-        self.polys.append(p3)
-        p4 = Poly(np.array([(650.0, 600.0), (1150.0, 600.0), (1150.0, 700.0), (600.0, 700.0)]), i = None, r = None)
-        self.polys.append(p4)
+        # p2 = Poly(np.array([(700.0, 190.0), (1150.0, 190.0), (1150.0, 250.0), (700.0, 200.0)]), i = None, r = None)
+        # self.polys.append(p2)
+        # p3 = Poly(np.array([(200, -10.0), (300, -10.0), (250.0, 300.0)]), i = None, r = None)
+        # self.polys.append(p3)
+        # p4 = Poly(np.array([(650.0, 600.0), (1150.0, 600.0), (1150.0, 700.0), (600.0, 700.0)]), i = None, r = None)
+        # self.polys.append(p4)
         pass
 
     def initialize_springs(self):
@@ -144,6 +148,24 @@ class Run:
             self.springs.append(Spring(self.pts[n], self.pts[next], k, l))
 
             self.pressures.append(Pressure(self.pts, 2))
+    
+    def initialize_caster(self):
+        k = 1.0
+        l = k / 3
+        self.casted.append(Cast(self.pts))
+        for x in self.casted:
+            for i in range(len(self.pts)):
+                self.springs.append(Spring(x.casted[i], self.pts[i], k, l))
+
+    
+    def move_cast(self):
+        for cast in self.casted:
+            x = cast.solid()
+            for i in range(len(cast.casted)):
+                cast.casted[i].updateP(x[i])
+                # cast.casted[i].eraseA()
+                
+
 
     def update_frame(self):
         for p in self.polys:
@@ -151,20 +173,22 @@ class Run:
 
         for pt in self.pts:
             pt.eraseA()
+        
+        self.move_cast()
 
         self.pressures[0].inflate()
-
         for spring in self.springs:
             self.draw_spring(spring)
             spring.applyForce()
-        for pt in self.pts:
-            # self.prints(pt)
+        for i in range(len(self.pts)):
+            pt = self.pts[i]
             for p in self.polys:
                 p.move(self.r)
                 p.collide(pt)
             if (pt.l or pt.c) and pygame.mouse.get_pressed()[0]:
                 pt.updateP(np.array(self.to_pygame(pygame.mouse.get_pos())))
             self.draw_pt(pt)
+            self.draw_pt(self.casted[0].casted[i])
             dt = 0.05
             pt.step(dt)
     def prints(self, pt):
@@ -185,9 +209,10 @@ class Run:
         # self.initialize_pts()
 
         # self.initialize_springs()
-    #     self.initialize_body(400.0, 710.0, 40.0, 5, 6, 10.0)
-        self.initialize_shape(400, 300, 70, 12, 6.0)
-    #     self.initialize_polys()
+        # self.initialize_body(400.0, 710.0, 40.0, 5, 6, 12.5)
+        self.initialize_shape(400, 500, 70, 6, 6.0)
+        self.initialize_polys()
+        self.initialize_caster()
 
         # Run until the user asks to quit
         running = True

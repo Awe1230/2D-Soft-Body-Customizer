@@ -20,6 +20,12 @@ class PointMass:
         self.l = l
         self.c = c
 
+    def round(m, digit):
+        m = (m*10**(digit+1))//10
+        if m % 100 == 99:
+            m = m + m/abs(m)
+        return m/10**digit
+
     def eraseA(self):
         self.a = np.array([0.0,self.g])
 
@@ -43,13 +49,8 @@ class PointMass:
         y = self.v - 2 * d * v
         #self.applyF(p * d * -2 * 100 * self.m)
         self.v = y
-    def round(self, m):
-        y = 5
-        for i in range(len(m)-1):
-            m[i] = int(m[i] * 10 ** y) / 10 ** y
     def step(self, dt):
         if not self.l:
-            self.round(self.a)
             self.p[0] += self.v[0]*dt
             self.p[1] += self.v[1]*dt
             self.v[0] += self.a[0]*dt
