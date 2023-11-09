@@ -133,7 +133,7 @@ class Run:
             if i < m - 1:
                 self.springs.append(Spring(self.pts[j * m + i], self.pts[j * m + (i + 1)], k, l))
     
-    def initialize_shape(self, x, y, r, sides, k, b):
+    def initialize_shape(self, x, y, r, sides, k, b1, b2):
         g = -9.8
         f = False
         l = k/3
@@ -146,9 +146,9 @@ class Run:
         for n in range(sides):
             next = (n + 1) % sides
             self.springs.append(Spring(self.pts[n], self.pts[next], k, l))
-
+        if b1:
             self.pressures.append(Pressure(self.pts, 2))
-        if b:
+        if b2:
             self.initialize_caster()
     
     def initialize_caster(self):
@@ -218,7 +218,7 @@ class Run:
 
         # self.initialize_springs()
         # self.initialize_body(400.0, 710.0, 40.0, 5, 6, 12.5)
-        self.initialize_shape(400, 500, 70, 6, 6.0, True)
+        self.initialize_shape(400, 500, 70, 6, 6.0, False, True)
         self.initialize_polys()
 
         # Run until the user asks to quit
