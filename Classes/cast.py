@@ -10,7 +10,7 @@ class Cast:
         self.c = self.center()
         self.a = self.tan(self.coords-self.c)
         self.l = self.length(self.coords)
-        self.previousfinal = 0.0
+        self.previousfinal = sum(self.a)-2*math.pi
         self.rotations = 0.0
     def center(self):
         return np.mean(np.array([pt.p for pt in self.pts]), axis = 0)
@@ -67,7 +67,8 @@ class Cast:
         center = self.center()
         currentangle = self.tan(np.array([pt.p for pt in self.pts])-center)
         newangle = self.a + self.angle(self.a, currentangle)
-        return self.caster(newangle, self.l) + center
+        x = self.caster(newangle, self.l) + center
+        return x
 
         currentv = self.volume()
         for n in range(len(self.pts)):
