@@ -65,18 +65,18 @@ class Run:
         f = False
         g = -5
         p1 = PointMass(np.array([x, y+s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
-        p2 = PointMass(np.array([x, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, True)
-        p3 = PointMass(np.array([x + s, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
+        # p2 = PointMass(np.array([x, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, True)
+        # p3 = PointMass(np.array([x + s, y]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
         p4 = PointMass(np.array([x + s, y + s]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
         # p5 = PointMass(np.array([x + s/2, y + s*3/2]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), 1, g, f, f)
         self.pts.append(p1)
-        self.pts.append(p2)
-        self.pts.append(p3)
+        # self.pts.append(p2)
+        # self.pts.append(p3)
         self.pts.append(p4)
         # self.pts.append(p5)
         self.polys.append(Poly(np.array(p1.p.copy()), p1, self.r))
-        self.polys.append(Poly(np.array(p2.p.copy()), p2, self.r))
-        self.polys.append(Poly(np.array(p3.p.copy()), p3, self.r))
+        # self.polys.append(Poly(np.array(p2.p.copy()), p2, self.r))
+        # self.polys.append(Poly(np.array(p3.p.copy()), p3, self.r))
         self.polys.append(Poly(np.array(p4.p.copy()), p4, self.r))
         # self.polys.append(Poly(np.array(p5.p.copy()), p5, self.r))
         self.pressures.append(Pressure(self.pts, 255500))
@@ -84,14 +84,14 @@ class Run:
     def initialize_polys(self):
         # p1 = Poly(np.array([(200.0, 500.0), (700.0, 400.0), (200.0, 400.0)]), i = None, r = None)
         # self.polys.append(p1)
-        p1 = Poly(np.array([(200.0, 250.0), (550.0, 300.0), (550.0, 250.0)]), i = None, r = None)
-        self.polys.append(p1)
         # p2 = Poly(np.array([(700.0, 190.0), (1150.0, 190.0), (1150.0, 250.0), (700.0, 200.0)]), i = None, r = None)
         # self.polys.append(p2)
         # p3 = Poly(np.array([(200, -10.0), (300, -10.0), (250.0, 300.0)]), i = None, r = None)
         # self.polys.append(p3)
         # p4 = Poly(np.array([(650.0, 600.0), (1150.0, 600.0), (1150.0, 700.0), (600.0, 700.0)]), i = None, r = None)
         # self.polys.append(p4)
+        p5 = Poly(np.array([(200.0, 200.0), (200.0, 300.0), (550.0, 250.0), (900.0, 300.0), (900, 200.0)]), i = None, r = None)
+        self.polys.append(p5)
         pass
 
     def initialize_springs(self):
@@ -101,14 +101,14 @@ class Run:
         self.springs.append(spring1)
         spring2 = Spring(self.pts[0], self.pts[3], s, d)
         self.springs.append(spring2)
-        # spring3 = Spring(self.pts[1], self.pts[4], s, d)
-        # self.springs.append(spring3)
+        spring3 = Spring(self.pts[1], self.pts[4], s, d)
+        self.springs.append(spring3)
         spring4 = Spring(self.pts[2], self.pts[3], s, d)
         self.springs.append(spring4)
         spring5 = Spring(self.pts[1], self.pts[2], s, d)
         self.springs.append(spring5)
-        # spring5 = Spring(self.pts[4], self.pts[2], s, d)
-        # self.springs.append(spring5)
+        spring5 = Spring(self.pts[4], self.pts[2], s, d)
+        self.springs.append(spring5)
     
     def initialize_body(self, x, y, s, m, n, k):
         g = -9.8
@@ -218,7 +218,7 @@ class Run:
 
         # self.initialize_springs()
         # self.initialize_body(400.0, 710.0, 40.0, 5, 6, 12.5)
-        self.initialize_shape(400, 500, 70, 6, 6.0, False, True)
+        self.initialize_shape(400, 500, 110, 20, 6.0, True, False)
         self.initialize_polys()
 
         # Run until the user asks to quit
